@@ -21,6 +21,8 @@ import 'package:test/test.dart';
 import 'golden_utils.dart';
 
 void main() {
+  qrMatrixParity();
+
   test('Barcode QR', () {
     final bc = Barcode.qrCode();
     if (bc is! Barcode2D) {
@@ -62,4 +64,34 @@ void main() {
     expect(bc.minLength, equals(1));
     expect(bc.maxLength, greaterThan(1024));
   });
+}
+
+/// Every correction level, auto and manual version, over payloads that
+/// exercise numeric, alphanumeric, byte and multi-byte UTF-8 content. The
+/// goldens were captured on qr 3.0.2, so any change of the encoder that moves
+/// a single module fails here.
+void qrMatrixParity() {
+  const payloads = <String, String>{
+    'numeric': '0123456789',
+    'alnum': 'HELLO WORLD 42',
+    'url': 'https://cinefly.example/s/AbC123?x=1',
+    'utf8': 'Café — 日本',
+  };
+  for (final level in BarcodeQRCorrectionLevel.values) {
+    for (final typeNumber in <int?>[null, 6]) {
+      for (final entry in payloads.entries) {
+        final label = '${level.name}_${typeNumber ?? 'auto'}_${entry.key}';
+        test('Barcode QR parity $label', () {
+          final bc = Barcode.qrCode(
+            errorCorrectLevel: level,
+            typeNumber: typeNumber,
+          );
+          expect(
+            bc.toSvg(entry.value),
+            matchesGoldenString('qr/parity/$label.svg'),
+          );
+        });
+      }
+    }
+  }
 }
