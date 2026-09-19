@@ -44,7 +44,8 @@ class BarcodePostnet extends BarcodeHM {
       final code = BarcodeMaps.postnet[codeUnit];
       if (code == null) {
         throw BarcodeException(
-            'Unable to encode "${String.fromCharCode(codeUnit)}" to $name');
+          'Unable to encode "${String.fromCharCode(codeUnit)}" to $name',
+        );
       }
       yield* addHW(code, BarcodeMaps.postnetLen);
 

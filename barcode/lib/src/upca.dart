@@ -61,7 +61,8 @@ class BarcodeUpcA extends BarcodeEan {
 
       if (codes == null) {
         throw BarcodeException(
-            'Unable to encode "${String.fromCharCode(code)}" to $name Barcode');
+          'Unable to encode "${String.fromCharCode(code)}" to $name Barcode',
+        );
       }
 
       if (index == 6) {
@@ -118,7 +119,14 @@ class BarcodeUpcA extends BarcodeEan {
   ) {
     if (!drawText) {
       return super.getHeight(
-          index, count, width, height, fontHeight, textPadding, drawText);
+        index,
+        count,
+        width,
+        height,
+        fontHeight,
+        textPadding,
+        drawText,
+      );
     }
 
     final h = height - fontHeight - textPadding;

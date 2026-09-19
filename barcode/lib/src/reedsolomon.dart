@@ -21,7 +21,7 @@ import 'barcode_exception.dart';
 class ReedSolomonEncoder {
   ReedSolomonEncoder(this.gf) {
     polynomes = <GFPoly>[
-      GFPoly(gf, <int>[1])
+      GFPoly(gf, <int>[1]),
     ];
   }
 
@@ -32,8 +32,9 @@ class ReedSolomonEncoder {
     if (degree >= polynomes.length) {
       var last = polynomes[polynomes.length - 1];
       for (var d = polynomes.length; d <= degree; d++) {
-        final next =
-            last.multiply(GFPoly(gf, <int>[1, gf.aLogTbl[d - 1 + gf.base]]));
+        final next = last.multiply(
+          GFPoly(gf, <int>[1, gf.aLogTbl[d - 1 + gf.base]]),
+        );
         polynomes.add(next);
         last = next;
       }
@@ -83,12 +84,12 @@ class GaloisField {
     return GFPoly(this, <int>[0]);
   }
 
-// AddOrSub add or substract two numbers
+  // AddOrSub add or substract two numbers
   int addOrSub(int a, int b) {
     return a ^ b;
   }
 
-// Multiply multiplys two numbers
+  // Multiply multiplys two numbers
   int multiply(int a, int b) {
     if (a == 0 || b == 0) {
       return 0;
@@ -96,7 +97,7 @@ class GaloisField {
     return aLogTbl[(logTbl[a] + logTbl[b]) % (size - 1)];
   }
 
-// Divide divides two numbers
+  // Divide divides two numbers
   int divide(int a, int b) {
     if (b == 0) {
       throw const BarcodeException('Divide by zero');
@@ -205,7 +206,9 @@ class GFPoly {
     while (remainder.getDegree() >= other.getDegree() && !remainder.zero()) {
       final degreeDiff = remainder.getDegree() - other.getDegree();
       final scale = fld.multiply(
-          remainder.getCoefficient(remainder.getDegree()), inversDenomLeadTerm);
+        remainder.getCoefficient(remainder.getDegree()),
+        inversDenomLeadTerm,
+      );
       final term = other.multByMonominal(degreeDiff, scale);
       final itQuot = GFPoly.monominalPoly(fld, degreeDiff, scale);
       quotient = quotient.addOrSubstract(itQuot);

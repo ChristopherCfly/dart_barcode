@@ -66,7 +66,8 @@ class BarcodeEan5 extends BarcodeEan2 {
 
       if (codes == null) {
         throw BarcodeException(
-            'Unable to encode "${String.fromCharCode(code)}" to $name Barcode');
+          'Unable to encode "${String.fromCharCode(code)}" to $name Barcode',
+        );
       }
 
       if (index >= 1) {

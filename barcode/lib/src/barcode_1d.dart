@@ -130,8 +130,7 @@ abstract class Barcode1D extends Barcode {
     double height,
     double fontHeight,
     double textPadding,
-  ) =>
-      0;
+  ) => 0;
 
   /// Margin before the first bar
   @protected
@@ -141,8 +140,7 @@ abstract class Barcode1D extends Barcode {
     double height,
     double fontHeight,
     double textPadding,
-  ) =>
-      0;
+  ) => 0;
 
   /// Margin after the last bar
   @protected
@@ -152,8 +150,7 @@ abstract class Barcode1D extends Barcode {
     double height,
     double fontHeight,
     double textPadding,
-  ) =>
-      0;
+  ) => 0;
 
   /// Stream the text operations required to draw the
   /// barcode texts. This is automatically called by [make]

@@ -27,11 +27,9 @@ import 'reedsolomon.dart';
 /// Aztec pyramid.
 class BarcodeAztec extends Barcode2D {
   /// Create a [BarcodeAztec] object
-  const BarcodeAztec(
-    this.minECCPercent,
-    this.userSpecifiedLayers,
-  )   : assert(minECCPercent >= 0 && minECCPercent <= 100),
-        assert(userSpecifiedLayers >= 0);
+  const BarcodeAztec(this.minECCPercent, this.userSpecifiedLayers)
+    : assert(minECCPercent >= 0 && minECCPercent <= 100),
+      assert(userSpecifiedLayers >= 0);
 
   /// Default Error correction percent
   static const defaultEcPercent = 33;
@@ -116,12 +114,7 @@ class BarcodeAztec extends Barcode2D {
 
     final m = _encode(data);
 
-    return Barcode2DMatrix(
-      m.matrixSize,
-      m.matrixSize,
-      1,
-      m.bits,
-    );
+    return Barcode2DMatrix(m.matrixSize, m.matrixSize, 1, m.bits);
   }
 
   @override
@@ -260,11 +253,14 @@ class BarcodeAztec extends Barcode2D {
     return result;
   }
 
-// We update a set of states for a new character by updating each state
-// for the new character, merging the results, and then removing the
-// non-optimal states.
+  // We update a set of states for a new character by updating each state
+  // for the new character, merging the results, and then removing the
+  // non-optimal states.
   List<_State> _updateStateListForChar(
-      List<_State> states, List<int> data, int index) {
+    List<_State> states,
+    List<int> data,
+    int index,
+  ) {
     final result = <_State>[];
     for (final s in states) {
       final r = _updateStateForChar(s, data, index);
@@ -275,9 +271,9 @@ class BarcodeAztec extends Barcode2D {
     return _simplifyStates(result);
   }
 
-// Return a set of states that represent the possible ways of updating this
-// state for the next character.  The resulting set of states are added to
-// the "result" list.
+  // Return a set of states that represent the possible ways of updating this
+  // state for the next character.  The resulting set of states are added to
+  // the "result" list.
   List<_State> _updateStateForChar(_State s, List<int> data, int index) {
     final result = <_State>[];
     final ch = data[index];
@@ -322,11 +318,15 @@ class BarcodeAztec extends Barcode2D {
     return result;
   }
 
-// We update a set of states for a new character by updating each state
-// for the new character, merging the results, and then removing the
-// non-optimal states.
+  // We update a set of states for a new character by updating each state
+  // for the new character, merging the results, and then removing the
+  // non-optimal states.
   List<_State> _updateStateListForPair(
-      List<_State> states, List<int> data, int index, int pairCode) {
+    List<_State> states,
+    List<int> data,
+    int index,
+    int pairCode,
+  ) {
     final result = <_State>[];
     for (final s in states) {
       final r = _updateStateForPair(s, data, index, pairCode);
@@ -338,17 +338,23 @@ class BarcodeAztec extends Barcode2D {
   }
 
   List<_State> _updateStateForPair(
-      _State s, List<int> data, int index, int pairCode) {
+    _State s,
+    List<int> data,
+    int index,
+    int pairCode,
+  ) {
     final result = <_State>[];
     final stateNoBinary = s.endBinaryShift(index);
     // Possibility 1.  Latch to MODE_PUNCT, and then append this code
-    result
-        .add(stateNoBinary.latchAndAppend(_EncodingMode.mode_punct, pairCode));
+    result.add(
+      stateNoBinary.latchAndAppend(_EncodingMode.mode_punct, pairCode),
+    );
     if (s.mode != _EncodingMode.mode_punct) {
       // Possibility 2.  Shift to MODE_PUNCT, and then append this code.
       // Every state except MODE_PUNCT (handled above) can shift
       result.add(
-          stateNoBinary.shiftAndAppend(_EncodingMode.mode_punct, pairCode));
+        stateNoBinary.shiftAndAppend(_EncodingMode.mode_punct, pairCode),
+      );
     }
     if (pairCode == 3 || pairCode == 4) {
       // both characters are in DIGITS.  Sometimes better to just add two digits
@@ -399,7 +405,10 @@ class BarcodeAztec extends Barcode2D {
   }
 
   List<bool> _generateModeMessage(
-      bool compact, int layers, int messageSizeInWords) {
+    bool compact,
+    int layers,
+    int messageSizeInWords,
+  ) {
     var modeMessage = <bool>[];
     if (compact) {
       modeMessage.addAll(_addBits(layers - 1, 2));
@@ -414,7 +423,11 @@ class BarcodeAztec extends Barcode2D {
   }
 
   void _drawModeMessage(
-      _AztecCode matrix, bool compact, int matrixSize, List<bool> modeMessage) {
+    _AztecCode matrix,
+    bool compact,
+    int matrixSize,
+    List<bool> modeMessage,
+  ) {
     final center = matrixSize ~/ 2;
 
     if (compact) {
@@ -469,7 +482,7 @@ class BarcodeAztec extends Barcode2D {
     matrix.set(center + size, center + size - 1);
   }
 
-// Encode returns an aztec barcode with the given content
+  // Encode returns an aztec barcode with the given content
   _AztecCode _encode(List<int> data) {
     final bits = _highlevelEncode(data);
     final eccBits = ((bits.length * minECCPercent) ~/ 100) + 11;
@@ -507,7 +520,7 @@ class BarcodeAztec extends Barcode2D {
       // We look at the possible table sizes in the order Compact1, Compact2, Compact3,
       // Compact4, Normal4,...  Normal(i) for i < 4 isn't typically used since Compact(i+1)
       // is the same size, but has more data.
-      for (var i = 0;; i++) {
+      for (var i = 0; ; i++) {
         if (i > _maxNbBits) {
           throw const BarcodeException('Data too large for an aztec code');
         }
@@ -537,11 +550,17 @@ class BarcodeAztec extends Barcode2D {
         }
       }
     }
-    final messageBits =
-        _generateCheckWords(stuffedBits, totalBitsInLayer, wordSize);
+    final messageBits = _generateCheckWords(
+      stuffedBits,
+      totalBitsInLayer,
+      wordSize,
+    );
     final messageSizeInWords = stuffedBits.length ~/ wordSize;
-    final modeMessage =
-        _generateModeMessage(compact, layers, messageSizeInWords);
+    final modeMessage = _generateModeMessage(
+      compact,
+      layers,
+      messageSizeInWords,
+    );
 
     // allocate symbol
     int baseMatrixSize;
@@ -588,16 +607,22 @@ class BarcodeAztec extends Barcode2D {
             code.set(alignmentMap[i * 2 + k], alignmentMap[i * 2 + j]);
           }
           if (messageBits[rowOffset + rowSize * 2 + columnOffset + k]) {
-            code.set(alignmentMap[i * 2 + j],
-                alignmentMap[baseMatrixSize - 1 - i * 2 - k]);
+            code.set(
+              alignmentMap[i * 2 + j],
+              alignmentMap[baseMatrixSize - 1 - i * 2 - k],
+            );
           }
           if (messageBits[rowOffset + rowSize * 4 + columnOffset + k]) {
-            code.set(alignmentMap[baseMatrixSize - 1 - i * 2 - k],
-                alignmentMap[baseMatrixSize - 1 - i * 2 - j]);
+            code.set(
+              alignmentMap[baseMatrixSize - 1 - i * 2 - k],
+              alignmentMap[baseMatrixSize - 1 - i * 2 - j],
+            );
           }
           if (messageBits[rowOffset + rowSize * 6 + columnOffset + k]) {
-            code.set(alignmentMap[baseMatrixSize - 1 - i * 2 - j],
-                alignmentMap[i * 2 + k]);
+            code.set(
+              alignmentMap[baseMatrixSize - 1 - i * 2 - j],
+              alignmentMap[i * 2 + k],
+            );
           }
         }
       }
@@ -613,7 +638,7 @@ class BarcodeAztec extends Barcode2D {
     } else {
       _drawBullsEye(code, matrixSize ~/ 2, 7);
       var j = 0;
-      for (var i = 0; i < baseMatrixSize / 2 - 1; i += 15,) {
+      for (var i = 0; i < baseMatrixSize / 2 - 1; i += 15) {
         for (var k = (matrixSize ~/ 2) & 1; k < matrixSize; k += 2) {
           code.set(matrixSize ~/ 2 - j, k);
           code.set(matrixSize ~/ 2 + j, k);
@@ -636,7 +661,7 @@ abstract class _Token {
 }
 
 class _SimpleToken extends _Token {
-  _SimpleToken(_Token? prev, this.value, this.bitCount) : super(prev);
+  _SimpleToken(super.prev, this.value, this.bitCount);
 
   final int value;
   final int bitCount;
@@ -648,8 +673,7 @@ class _SimpleToken extends _Token {
 }
 
 class _BinaryShiftToken extends _Token {
-  _BinaryShiftToken(_Token? prev, this.bShiftStart, this.bShiftByteCnt)
-      : super(prev);
+  _BinaryShiftToken(super.prev, this.bShiftStart, this.bShiftByteCnt);
 
   final int bShiftStart;
   final int bShiftByteCnt;
@@ -697,16 +721,12 @@ enum _EncodingMode {
 
 // A map showing the available shift codes.  (The shifts to BINARY are not shown)
 const _shiftTable = <_EncodingMode, Map<_EncodingMode, int>>{
-  _EncodingMode.mode_upper: {
-    _EncodingMode.mode_punct: 0,
-  },
+  _EncodingMode.mode_upper: {_EncodingMode.mode_punct: 0},
   _EncodingMode.mode_lower: {
     _EncodingMode.mode_punct: 0,
     _EncodingMode.mode_upper: 28,
   },
-  _EncodingMode.mode_mixed: {
-    _EncodingMode.mode_punct: 0,
-  },
+  _EncodingMode.mode_mixed: {_EncodingMode.mode_punct: 0},
   _EncodingMode.mode_digit: {
     _EncodingMode.mode_punct: 0,
     _EncodingMode.mode_upper: 15,
@@ -733,11 +753,11 @@ class _State {
   final int bShiftByteCount;
   final int bitCount;
 
-// The Latch Table shows, for each pair of Modes, the optimal method for
-// getting from one mode to another.  In the worst possible case, this can
-// be up to 14 bits.  In the best possible case, we are already there!
-// The high half-word of each entry gives the number of bits.
-// The low half-word of each entry are the actual bits necessary to change
+  // The Latch Table shows, for each pair of Modes, the optimal method for
+  // getting from one mode to another.  In the worst possible case, this can
+  // be up to 14 bits.  In the best possible case, we are already there!
+  // The high half-word of each entry gives the number of bits.
+  // The low half-word of each entry are the actual bits necessary to change
   static const latchTable = <_EncodingMode, Map<_EncodingMode, int>>{
     _EncodingMode.mode_upper: {
       _EncodingMode.mode_upper: 0,
@@ -776,8 +796,8 @@ class _State {
     },
   };
 
-// Create a new state representing this state with a latch to a (not
-// necessary different) mode, and then a code.
+  // Create a new state representing this state with a latch to a (not
+  // necessary different) mode, and then a code.
   _State latchAndAppend(_EncodingMode mode, int value) {
     var bitCount = this.bitCount;
     var tokens = this.tokens;
@@ -796,14 +816,17 @@ class _State {
     );
   }
 
-// Create a new state representing this state, with a temporary shift
-// to a different mode to output a single value.
+  // Create a new state representing this state, with a temporary shift
+  // to a different mode to output a single value.
   _State shiftAndAppend(_EncodingMode mode, int value) {
     var tokens = this.tokens;
 
     // Shifts exist only to UPPER and PUNCT, both with tokens size 5.
     tokens = _SimpleToken(
-        tokens, _shiftTable[this.mode]![mode]!, _bitCount(this.mode));
+      tokens,
+      _shiftTable[this.mode]![mode]!,
+      _bitCount(this.mode),
+    );
     tokens = _SimpleToken(tokens, value, 5);
 
     return _State(
@@ -814,8 +837,8 @@ class _State {
     );
   }
 
-// Create a new state representing this state, but an additional character
-// output in Binary Shift mode.
+  // Create a new state representing this state, but an additional character
+  // output in Binary Shift mode.
   _State addBinaryShiftChar(int index) {
     var tokens = this.tokens;
     var mode = this.mode;
@@ -847,14 +870,17 @@ class _State {
     return result;
   }
 
-// Create the state identical to this one, but we are no longer in
-// Binary Shift mode.
+  // Create the state identical to this one, but we are no longer in
+  // Binary Shift mode.
   _State endBinaryShift(int index) {
     if (bShiftByteCount == 0) {
       return this;
     }
     final tokens = _BinaryShiftToken(
-        this.tokens, index - bShiftByteCount, bShiftByteCount);
+      this.tokens,
+      index - bShiftByteCount,
+      bShiftByteCount,
+    );
     return _State(
       mode: mode,
       tokens: tokens,
@@ -863,8 +889,8 @@ class _State {
     );
   }
 
-// Returns true if "this" state is better (or equal) to be in than "that"
-// state under all possible circumstances.
+  // Returns true if "this" state is better (or equal) to be in than "that"
+  // state under all possible circumstances.
   bool isBetterThanOrEqualTo(_State other) {
     var mySize = bitCount + (latchTable[mode]![other.mode]! >> 16);
 
@@ -899,7 +925,7 @@ int _bitCount(_EncodingMode em) {
 
 class _AztecCode {
   _AztecCode(this.matrixSize)
-      : bits = List<bool>.filled(matrixSize * matrixSize, false);
+    : bits = List<bool>.filled(matrixSize * matrixSize, false);
 
   final List<bool> bits;
 

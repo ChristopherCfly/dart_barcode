@@ -62,8 +62,10 @@ class BarcodeCode128 extends Barcode1D {
     required this.escapes,
     required this.keepParenthesis,
     required this.addSpaceAfterParenthesis,
-  }) : assert(useCode128A || useCode128B || useCode128C,
-            'Enable at least one of the CODE 128 tables');
+  }) : assert(
+         useCode128A || useCode128B || useCode128C,
+         'Enable at least one of the CODE 128 tables',
+       );
 
   /// Use Code 128 A table
   final bool useCode128A;
@@ -88,19 +90,21 @@ class BarcodeCode128 extends Barcode1D {
 
   @override
   Iterable<int> get charSet => BarcodeMaps.code128B.keys
-          .where((int x) => useCode128B && x >= 0)
-          .followedBy(
-              BarcodeMaps.code128A.keys.where((int x) => useCode128A && x >= 0))
-          .followedBy(useCode128C
-              ? List<int>.generate(10, (int index) => index + 0x30)
-              : [])
-          .followedBy([
+      .where((int x) => useCode128B && x >= 0)
+      .followedBy(
+        BarcodeMaps.code128A.keys.where((int x) => useCode128A && x >= 0),
+      )
+      .followedBy(
+        useCode128C ? List<int>.generate(10, (int index) => index + 0x30) : [],
+      )
+      .followedBy([
         BarcodeMaps.code128FNC1,
         if (useCode128A || useCode128B) BarcodeMaps.code128FNC2,
         if (useCode128A || useCode128B) BarcodeMaps.code128FNC3,
         if (useCode128A || useCode128B) BarcodeMaps.code128FNC4,
         if (isGS1) ...[40, 41],
-      ]).toSet();
+      ])
+      .toSet();
 
   @override
   String get name => isGS1 ? 'GS1 128' : 'CODE 128';
@@ -130,7 +134,7 @@ class BarcodeCode128 extends Barcode1D {
 
     void addFrom(List<int> data, int start) {
       Map<int, int>? t;
-      if (table & 4 != 0 && digitCount & 1 == 0 /*&& digitCount > 0*/) {
+      if (table & 4 != 0 && digitCount & 1 == 0 /*&& digitCount > 0*/ ) {
         // New data from table C
         t = BarcodeMaps.code128C;
         if (lastTable == 1) {
@@ -161,7 +165,8 @@ class BarcodeCode128 extends Barcode1D {
 
       if (t == null) {
         throw BarcodeException(
-            'Unable to encode "${String.fromCharCodes(data)}" to $name Barcode');
+          'Unable to encode "${String.fromCharCodes(data)}" to $name Barcode',
+        );
       }
 
       // Add sublist(start, length + start)
@@ -206,7 +211,8 @@ class BarcodeCode128 extends Barcode1D {
 
       if (available == 0) {
         throw BarcodeException(
-            'Unable to encode "${String.fromCharCode(code)}" to $name Barcode');
+          'Unable to encode "${String.fromCharCode(code)}" to $name Barcode',
+        );
       }
 
       if (codeC) {
@@ -234,7 +240,8 @@ class BarcodeCode128 extends Barcode1D {
             table &= 3;
             if (table == 0) {
               throw BarcodeException(
-                  'Unable to encode "${String.fromCharCodes(data)}" to $name Barcode');
+                'Unable to encode "${String.fromCharCodes(data)}" to $name Barcode',
+              );
             }
             addFrom(data, index + digitCount + 1);
             length = digitCount;
@@ -378,7 +385,9 @@ class BarcodeCode128 extends Barcode1D {
 
     // Stop
     yield* add(
-        BarcodeMaps.code128[BarcodeMaps.code128Stop]!, BarcodeMaps.code128Len);
+      BarcodeMaps.code128[BarcodeMaps.code128Stop]!,
+      BarcodeMaps.code128Len,
+    );
 
     // Termination Bars
     yield true;
