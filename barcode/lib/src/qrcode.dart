@@ -55,12 +55,11 @@ class BarcodeQR extends Barcode2D {
 
   @override
   Barcode2DMatrix convert(Uint8List data) {
-    final errorLevel = QrErrorCorrectLevel.levels[errorCorrectLevel.index];
-
-    final qrCode = typeNumber == null
-        ? QrCode.fromUint8List(data: data, errorCorrectLevel: errorLevel)
-        : (QrCode(typeNumber!, errorLevel)
-          ..addByteData(data.buffer.asByteData()));
+    final qrCode = QrCode(
+      payload: QrPayload.fromTypedData(data),
+      errorCorrectLevel: _qrLevel(errorCorrectLevel),
+      minTypeNumber: typeNumber ?? 1,
+    );
 
     final qrImage = QrImage(qrCode);
 
@@ -80,4 +79,19 @@ class BarcodeQR extends Barcode2D {
 
   @override
   int get maxLength => 2953;
+
+  /// qr 4 orders its enum by the QR standard's bit encoding (M, L, H, Q), not
+  /// by strength, so the mapping is by name rather than by index.
+  static QrErrorCorrectLevel _qrLevel(BarcodeQRCorrectionLevel level) {
+    switch (level) {
+      case BarcodeQRCorrectionLevel.low:
+        return QrErrorCorrectLevel.low;
+      case BarcodeQRCorrectionLevel.medium:
+        return QrErrorCorrectLevel.medium;
+      case BarcodeQRCorrectionLevel.quartile:
+        return QrErrorCorrectLevel.quartile;
+      case BarcodeQRCorrectionLevel.high:
+        return QrErrorCorrectLevel.high;
+    }
+  }
 }
